@@ -48,7 +48,7 @@ Examples
 {
   "from": "centmin",
   "to": "George",
-  "date": "2021-07-05T07:41:09Z",
+  "date": "2021-07-05T08:13:12Z",
   "message": "message text"
 }
 ```
@@ -57,7 +57,9 @@ Examples
 {
   "from": "centmin",
   "to": "George",
-  "date": "2021-07-05T07:40:04Z",
+  "date": "2021-07-05T08:13:20Z",
   "message": "message html"
 }
 ```
+
+![Telegram Messages](/images/telegram-send-02.png)
