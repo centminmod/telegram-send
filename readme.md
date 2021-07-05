@@ -1,9 +1,15 @@
 # tgsend.sh
 
-Send message or text files to your own Telegram Bot API using BotFather:
+Send message or text files to your own Telegram Bot API created using BotFather:
 
 * https://core.telegram.org/bots#3-how-do-i-create-a-bot
 * https://core.telegram.org/bots/api#sendmessage
+
+## Telegram BotFather
+
+![Telegram BotFather Bot Creation](/images/telegram-botfather-01.png)
+
+# Dependencies
 
 Requires jq json tool install:
 
@@ -47,7 +53,7 @@ send file
 
 # Examples
 
-Send messages in plain text or HTML format
+## Send messages in plain text or HTML format
 
 ```
 ./tgsend.sh send "message text"
@@ -70,7 +76,7 @@ Send messages in plain text or HTML format
 
 ![Telegram Messages](/images/telegram-send-02.png)
 
-Send text file
+## Send text file
 
 ```
 ./tgsend.sh sendf test.txt
