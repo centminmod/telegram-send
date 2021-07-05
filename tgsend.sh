@@ -17,10 +17,18 @@
 # tgtoken='YOUR_TELEGRAM_BOT_API_TOKEN'
 # tgchatid='YOUR_TELEGRAM_CHATID'
 # tgapi="https://api.telegram.org/bot$tgtoken"
+#
+# if you don't know your Telegram chat id, you can leave
+# it empty and script will derive the chat id from the
+# Telegram API via your Bot API token credentials
 #########################################################
 tg_notifications='y'
 #########################################################
 . tgtoken.ini
+
+if [ -z "$tgchatid" ]; then
+  tgchatid=$(curl -4s $tgapi/getUpdates | jq -r '.result[].message.chat.id')
+fi
 
 tg_send() {
   format=$1
