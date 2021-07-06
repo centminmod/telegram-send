@@ -1,9 +1,10 @@
 #!/bin/bash
 #########################################################
-# send message to your own Telegram Bot API 
-# using BotFather 
+# send message to your own Telegram Bot API
+# using BotFather
 # https://core.telegram.org/bots#3-how-do-i-create-a-bot
 # https://core.telegram.org/bots/api#sendmessage
+# https://core.telegram.org/bots/api#editmessagetext
 #
 # requires jq json tool install:
 #
@@ -23,6 +24,9 @@
 # Telegram API via your Bot API token credentials
 #########################################################
 tg_debug='n'
+# insert message_id into messages via editMessageText
+# https://core.telegram.org/bots/api#editmessagetext
+tg_addmsgid='y'
 # whether telegram notifications are enabled
 tg_notifications='y'
 # disable/enable web previews
@@ -50,20 +54,36 @@ tg_send() {
     format_opt=
   fi
   if [[ "$tg_notifications" = [nN] || "$silent" = 'quiet' ]]; then
-    notify_opt=' -d disable_notification=true'
+    notify_opt=' -d "disable_notification=true"'
   else
-    notify_opt=' -d disable_notification=false'
+    notify_opt=' -d "disable_notification=false"'
   fi
   if [[ "$tg_webpreview" = [yY] ]]; then
-    webpreview_opt=' -d disable_web_page_preview=false'
+    webpreview_opt=' -d "disable_web_page_preview=false"'
   else
-    webpreview_opt=' -d disable_web_page_preview=true'
+    webpreview_opt=' -d "disable_web_page_preview=true"'
   fi
 
   if [[ "$tg_debug" = [yY] ]]; then
-    curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r
+    json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r)
+    msgid=$(echo "$json_output" | jq -r '.result.message_id')
+    if [[ "$tg_addmsgid" = [yY] ]]; then
+      append_text="[msgid: $msgid] $message"
+      tg_type='editMessageText'
+      json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
+    fi
+    echo "$json_output"
+    echo
+    echo "message_id: $msgid"
   else
-    curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, message: .text }'
+    json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message")
+    msgid=$(echo "$json_output" | jq -r '.result.message_id')
+    if [[ "$tg_addmsgid" = [yY] ]]; then
+      append_text="[msgid: $msgid] $message"
+      tg_type='editMessageText'
+      json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
+    fi
+    echo "$json_output" | jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .edit_date | todate, message: .text }'
   fi
 }
 
@@ -76,14 +96,16 @@ tg_sendf() {
   if [[ "$format" = 'file' && -f "$file" ]]; then
     file="$file"
     if [[ "$tg_notifications" = [nN] || "$silent" = 'quiet' ]]; then
-      notify_opt=' -d disable_notification=true'
+      notify_opt=' -d "disable_notification=true"'
     else
-      notify_opt=' -d disable_notification=false'
+      notify_opt=' -d "disable_notification=false"'
     fi
     if [[ "$tg_debug" = [yY] ]]; then
-      curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -F document=@"$file" "$tgapi/${tg_type}?chat_id=$tgchatid" |  jq -r
+      json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -F document=@"$file" "$tgapi/${tg_type}?chat_id=$tgchatid" |  jq -r)
+      echo "$json_output"
     else
-      curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -F document=@"$file" "$tgapi/${tg_type}?chat_id=$tgchatid" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, document: .document.file_name, mime: .document.mime_type, size: .document.file_size }'
+      json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -F document=@"$file" "$tgapi/${tg_type}?chat_id=$tgchatid" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, document: .document.file_name, mime: .document.mime_type, size: .document.file_size }')
+      echo "$json_output"
     fi
   else
     echo "file not found: $file"

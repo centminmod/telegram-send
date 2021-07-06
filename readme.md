@@ -109,3 +109,19 @@ send file
 ```
 
 ![Telegram File Send](/images/telegram-send-03.png)
+
+## Send text message with Telegram message_id added
+
+New feature which by default is enabled is to add the message_id to the messages via option `tg_addmsgid='y'`
+
+```
+./tgsend.sh send "message v3"
+{
+  "from": "centmin",
+  "to": "George",
+  "date": "2021-07-06T22:33:34Z",
+  "message": "[msgid: 37] message v3"
+}
+```
+
+![Telegram File Send](/images/telegram-send-05.png)
