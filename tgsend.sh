@@ -22,7 +22,10 @@
 # it empty and script will derive the chat id from the
 # Telegram API via your Bot API token credentials
 #########################################################
+# whether telegram notifications are enabled
 tg_notifications='y'
+# curl --max-time and --connect-timeout for transfer/connect
+tg_timeout='10'
 #########################################################
 . tgtoken.ini
 
@@ -49,7 +52,7 @@ tg_send() {
     notify_opt=' -d disable_notification=false'
   fi
 
-  curl -4s -X POST "$tgapi/${tg_type}"${notify_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, message: .text }'
+  curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, message: .text }'
 }
 
 tg_sendf() {
@@ -65,7 +68,7 @@ tg_sendf() {
     else
       notify_opt=' -d disable_notification=false'
     fi
-    curl -4s -F document=@"$file" "$tgapi/${tg_type}?chat_id=$tgchatid" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, document: .document.file_name, mime: .document.mime_type, size: .document.file_size }'
+    curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -F document=@"$file" "$tgapi/${tg_type}?chat_id=$tgchatid" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, document: .document.file_name, mime: .document.mime_type, size: .document.file_size }'
   else
     echo "file not found: $file"
   fi

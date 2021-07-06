@@ -73,8 +73,17 @@ send file
   "message": "message html"
 }
 ```
+```
+./tgsend.sh send "$(free -mlt)"
+{
+  "from": "centmin",
+  "to": "George",
+  "date": "2021-07-06T00:30:14Z",
+  "message": "total        used        free      shared  buff/cache   available\nMem:          31973        7189        2183        2229       22600       22162\nLow:          31973       29789        2183\nHigh:             0           0           0\nSwap:          2045           3        2042\nTotal:        34019        7192        4226"
+}
+```
 
-![Telegram Messages](/images/telegram-send-02.png)
+![Telegram Messages](/images/telegram-send-04.png)
 
 ## Send text file
 
