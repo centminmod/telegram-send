@@ -30,7 +30,7 @@ tg_timeout='10'
 . tgtoken.ini
 
 if [ -z "$tgchatid" ]; then
-  tgchatid=$(curl -4s $tgapi/getUpdates | jq -r '.result[].message.chat.id')
+  tgchatid=$(curl -4s "$tgapi/getUpdates" | jq -r '.result[].message.chat.id')
 fi
 
 tg_send() {
