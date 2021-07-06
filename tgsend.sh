@@ -22,8 +22,11 @@
 # it empty and script will derive the chat id from the
 # Telegram API via your Bot API token credentials
 #########################################################
+tg_debug='n'
 # whether telegram notifications are enabled
 tg_notifications='y'
+# disable/enable web previews
+tg_webpreview='n'
 # curl --max-time and --connect-timeout for transfer/connect
 tg_timeout='10'
 #########################################################
@@ -46,13 +49,22 @@ tg_send() {
   else
     format_opt=
   fi
-  if [[ "tg_notifications" = [nN] || "$silent" = 'quiet' ]]; then
+  if [[ "$tg_notifications" = [nN] || "$silent" = 'quiet' ]]; then
     notify_opt=' -d disable_notification=true'
   else
     notify_opt=' -d disable_notification=false'
   fi
+  if [[ "$tg_webpreview" = [yY] ]]; then
+    webpreview_opt=' -d disable_web_page_preview=false'
+  else
+    webpreview_opt=' -d disable_web_page_preview=true'
+  fi
 
-  curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, message: .text }'
+  if [[ "$tg_debug" = [yY] ]]; then
+    curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r
+  else
+    curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, message: .text }'
+  fi
 }
 
 tg_sendf() {
@@ -63,12 +75,16 @@ tg_sendf() {
 
   if [[ "$format" = 'file' && -f "$file" ]]; then
     file="$file"
-    if [[ "tg_notifications" = [nN] || "$silent" = 'quiet' ]]; then
+    if [[ "$tg_notifications" = [nN] || "$silent" = 'quiet' ]]; then
       notify_opt=' -d disable_notification=true'
     else
       notify_opt=' -d disable_notification=false'
     fi
-    curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -F document=@"$file" "$tgapi/${tg_type}?chat_id=$tgchatid" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, document: .document.file_name, mime: .document.mime_type, size: .document.file_size }'
+    if [[ "$tg_debug" = [yY] ]]; then
+      curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -F document=@"$file" "$tgapi/${tg_type}?chat_id=$tgchatid" |  jq -r
+    else
+      curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -F document=@"$file" "$tgapi/${tg_type}?chat_id=$tgchatid" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, document: .document.file_name, mime: .document.mime_type, size: .document.file_size }'
+    fi
   else
     echo "file not found: $file"
   fi
