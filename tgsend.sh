@@ -33,8 +33,15 @@ tg_notifications='y'
 tg_webpreview='n'
 # curl --max-time and --connect-timeout for transfer/connect
 tg_timeout='10'
+
+script_dir=$(readlink -f $(dirname ${BASH_SOURCE[0]}))
 #########################################################
-. tgtoken.ini
+if [ -f "${script_dir}/tgtoken.ini" ]; then
+  . "${script_dir}/tgtoken.ini"
+fi
+if [ -f "/etc/centminmod/tgtoken.ini" ]; then
+  . "/etc/centminmod/tgtoken.ini"
+fi
 
 if [ -z "$tgchatid" ]; then
   tgchatid=$(curl -4s "$tgapi/getUpdates" | jq -r '.result[].message.chat.id')
