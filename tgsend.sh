@@ -80,10 +80,16 @@ tg_send() {
       append_text="[msgid: $input_msgid Updated: $(date +"%a %d-%b-%y %T %Z")]  $message"
       tg_type='editMessageText'
       msgchar_count=$(echo $append_text | wc -m)
+      # calculate number of 4090 character messages needed to
+      # send the entire message
+      msg_count=$(echo "($(echo "$append_text" | wc -m)+4090-1) / 4090" | bc)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$input_msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
     else
       # send a new message
       msgchar_count=$(echo $message | wc -m)
+      # calculate number of 4090 character messages needed to
+      # send the entire message
+      msg_count=$(echo "($(echo "$message" | wc -m)+4090-1) / 4090" | bc)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r)
     fi
     msgid=$(echo "$json_output" | jq -r '.result.message_id')
@@ -93,12 +99,16 @@ tg_send() {
       append_text="[msgid: $msgid] $message"
       tg_type='editMessageText'
       msgchar_count=$(echo $append_text | wc -m)
+      # calculate number of 4090 character messages needed to
+      # send the entire message
+      msg_count=$(echo "($(echo "$append_text" | wc -m)+4090-1) / 4090" | bc)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
     fi
     echo "$json_output"
     echo
     echo "message_id: $msgid"
     echo "message_char_count: $msgchar_count"
+    echo "message count: $msg_count"
   else
     # tg_debug='n' only outputs a compact json summary
     if [[ "$update" = 'update' ]]; then
@@ -106,10 +116,16 @@ tg_send() {
       append_text="[msgid: $input_msgid Updated: $(date +"%a %d-%b-%y %T %Z")]  $message"
       tg_type='editMessageText'
       msgchar_count=$(echo $append_text | wc -m)
+      # calculate number of 4090 character messages needed to
+      # send the entire message
+      msg_count=$(echo "($(echo "$append_text" | wc -m)+4090-1) / 4090" | bc)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$input_msgid" -d chat_id="$tgchatid" -d text="$append_text")
     else
       # send a new message
       msgchar_count=$(echo $message | wc -m)
+      # calculate number of 4090 character messages needed to
+      # send the entire message
+      msg_count=$(echo "($(echo "$message" | wc -m)+4090-1) / 4090" | bc)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message")
     fi
     msgid=$(echo "$json_output" | jq -r '.result.message_id')
@@ -119,6 +135,9 @@ tg_send() {
       append_text="[msgid: $msgid] $message"
       tg_type='editMessageText'
       msgchar_count=$(echo $append_text | wc -m)
+      # calculate number of 4090 character messages needed to
+      # send the entire message
+      msg_count=$(echo "($(echo "$append_text" | wc -m)+4090-1) / 4090" | bc)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
     fi
     echo "$json_output" | jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .edit_date | todate, message: .text }'
