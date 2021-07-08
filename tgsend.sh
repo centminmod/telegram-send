@@ -74,17 +74,22 @@ tg_send() {
   fi
 
   if [[ "$tg_debug" = [yY] ]]; then
+    # debug mode tg_debug='y' outputs the full json output
     if [[ "$update" = 'update' ]]; then
+      # update an existing message_id
       append_text="[msgid: $input_msgid Updated: $(date +"%a %d-%b-%y %T %Z")]  $message"
       tg_type='editMessageText'
       msgchar_count=$(echo $append_text | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$input_msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
     else
+      # send a new message
       msgchar_count=$(echo $message | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r)
     fi
     msgid=$(echo "$json_output" | jq -r '.result.message_id')
     if [[ "$tg_addmsgid" = [yY] && "$update" != 'update' ]]; then
+      # append message_id to newly sent messages to make it easier to track messages
+      # and be able to edit and update existing messages in future
       append_text="[msgid: $msgid] $message"
       tg_type='editMessageText'
       msgchar_count=$(echo $message | wc -m)
@@ -95,17 +100,22 @@ tg_send() {
     echo "message_id: $msgid"
     echo "message_char_count: $msgchar_count"
   else
+    # tg_debug='n' only outputs a compact json summary
     if [[ "$update" = 'update' ]]; then
+      # update an existing message_id
       append_text="[msgid: $input_msgid Updated: $(date +"%a %d-%b-%y %T %Z")]  $message"
       tg_type='editMessageText'
       msgchar_count=$(echo $append_text | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$input_msgid" -d chat_id="$tgchatid" -d text="$append_text")
     else
+      # send a new message
       msgchar_count=$(echo $message | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message")
     fi
     msgid=$(echo "$json_output" | jq -r '.result.message_id')
     if [[ "$tg_addmsgid" = [yY] && "$update" != 'update' ]]; then
+      # append message_id to newly sent messages to make it easier to track messages
+      # and be able to edit and update existing messages in future
       append_text="[msgid: $msgid] $message"
       tg_type='editMessageText'
       msgchar_count=$(echo $message | wc -m)
@@ -129,9 +139,11 @@ tg_sendf() {
       notify_opt=' -d "disable_notification=false"'
     fi
     if [[ "$tg_debug" = [yY] ]]; then
+      # debug mode tg_debug='y' outputs the full json output
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -F document=@"$file" "$tgapi/${tg_type}?chat_id=$tgchatid" |  jq -r)
       echo "$json_output"
     else
+      # tg_debug='n' only outputs a compact json summary
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -F document=@"$file" "$tgapi/${tg_type}?chat_id=$tgchatid" |  jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .date | todate, document: .document.file_name, mime: .document.mime_type, size: .document.file_size }')
       echo "$json_output"
     fi
