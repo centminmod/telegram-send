@@ -149,3 +149,26 @@ New feature which by default is enabled is to add the message_id to the messages
 ```
 
 ![Telegram File Send](/images/telegram-send-05.png)
+
+Sending Centmin Mod LEMP stack cminfo command for JSON formatted cpu and memory statistics
+
+```
+./tgsend.sh send "$(cminfo sar-json | jq -r '."cpu-load"[]')"
+{
+  "from": "centmin",
+  "to": "George",
+  "date": "2021-07-08T01:16:15Z",
+  "message": "[msgid: 40] {\n  \"cpu\": \"all\",\n  \"user\": 1.21,\n  \"nice\": 0,\n  \"system\": 0.49,\n  \"iowait\": 0.43,\n  \"steal\": 0,\n  \"idle\": 97.87\n}"
+}
+```
+```
+./tgsend.sh send "$(cminfo sar-json | jq -r '."memory"')"
+{
+  "from": "centmin",
+  "to": "George",
+  "date": "2021-07-08T01:17:09Z",
+  "message": "[msgid: 41] {\n  \"memfree\": 3111888,\n  \"memused\": 29629116,\n  \"memused-percent\": 90.5,\n  \"buffers\": 1323936,\n  \"cached\": 17754908,\n  \"commit\": 25211564,\n  \"commit-percent\": 72.37,\n  \"active\": 13057488,\n  \"inactive\": 9479208,\n  \"dirty\": 84,\n  \"swpfree\": 2091768,\n  \"swpused\": 3328,\n  \"swpused-percent\": 0.16,\n  \"swpcad\": 204,\n  \"swpcad-percent\": 6.13\n}"
+}
+```
+
+![Telegram File Send](/images/telegram-send-07.png)
