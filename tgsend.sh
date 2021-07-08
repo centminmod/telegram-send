@@ -77,31 +77,38 @@ tg_send() {
     if [[ "$update" = 'update' ]]; then
       append_text="[msgid: $input_msgid Updated: $(date +"%a %d-%b-%y %T %Z")]  $message"
       tg_type='editMessageText'
+      msgchar_count=$(echo $append_text | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$input_msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
     else
+      msgchar_count=$(echo $message | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r)
     fi
     msgid=$(echo "$json_output" | jq -r '.result.message_id')
     if [[ "$tg_addmsgid" = [yY] && "$update" != 'update' ]]; then
       append_text="[msgid: $msgid] $message"
       tg_type='editMessageText'
+      msgchar_count=$(echo $message | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
     fi
     echo "$json_output"
     echo
     echo "message_id: $msgid"
+    echo "message_char_count: $msgchar_count"
   else
     if [[ "$update" = 'update' ]]; then
       append_text="[msgid: $input_msgid Updated: $(date +"%a %d-%b-%y %T %Z")]  $message"
       tg_type='editMessageText'
+      msgchar_count=$(echo $append_text | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$input_msgid" -d chat_id="$tgchatid" -d text="$append_text")
     else
+      msgchar_count=$(echo $message | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message")
     fi
     msgid=$(echo "$json_output" | jq -r '.result.message_id')
     if [[ "$tg_addmsgid" = [yY] && "$update" != 'update' ]]; then
       append_text="[msgid: $msgid] $message"
       tg_type='editMessageText'
+      msgchar_count=$(echo $message | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
     fi
     echo "$json_output" | jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .edit_date | todate, message: .text }'
