@@ -92,7 +92,7 @@ tg_send() {
       # and be able to edit and update existing messages in future
       append_text="[msgid: $msgid] $message"
       tg_type='editMessageText'
-      msgchar_count=$(echo $message | wc -m)
+      msgchar_count=$(echo $append_text | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
     fi
     echo "$json_output"
@@ -118,7 +118,7 @@ tg_send() {
       # and be able to edit and update existing messages in future
       append_text="[msgid: $msgid] $message"
       tg_type='editMessageText'
-      msgchar_count=$(echo $message | wc -m)
+      msgchar_count=$(echo $append_text | wc -m)
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
     fi
     echo "$json_output" | jq -r '.result | {from: .from.first_name, to: .chat.first_name, date: .edit_date | todate, message: .text }'
