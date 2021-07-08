@@ -75,7 +75,7 @@ tg_send() {
 
   if [[ "$tg_debug" = [yY] ]]; then
     if [[ "$update" = 'update' ]]; then
-      append_text="[msgid: $input_msgid] $message"
+      append_text="[msgid: $input_msgid Updated: $(date +"%a %d-%b-%y %T %Z")]  $message"
       tg_type='editMessageText'
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$input_msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
     else
@@ -92,7 +92,7 @@ tg_send() {
     echo "message_id: $msgid"
   else
     if [[ "$update" = 'update' ]]; then
-      append_text="[msgid: $input_msgid] $message"
+      append_text="[msgid: $input_msgid Updated: $(date +"%a %d-%b-%y %T %Z")]  $message"
       tg_type='editMessageText'
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$input_msgid" -d chat_id="$tgchatid" -d text="$append_text")
     else

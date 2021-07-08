@@ -107,16 +107,16 @@ send file
 ## Update an existing message with message_id
 
 ```
-./tgsend.sh update "updated message" 38
+./tgsend.sh updateq "updated message" 38
 {
   "from": "centmin",
   "to": "George",
-  "date": "2021-07-08T00:39:04Z",
-  "message": "[msgid: 38] updated message"
+  "date": "2021-07-08T01:05:35Z",
+  "message": "[msgid: 38 Updated: Thu 08-Jul-21 01:05:34 UTC]  updated message"
 }
 ```
 
-![Telegram Messages](/images/telegram-send-06.png)
+![Telegram Messages](/images/telegram-send-06b.png)
 
 ## Send text file
 
