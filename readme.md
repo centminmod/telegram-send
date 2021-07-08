@@ -1,6 +1,6 @@
 # tgsend.sh
 
-Send message or text files to your own Telegram Bot API created using BotFather:
+Send or update messages or send text files to your own Telegram Bot API created using BotFather:
 
 * https://core.telegram.org/bots#3-how-do-i-create-a-bot
 * https://core.telegram.org/bots/api#sendmessage
@@ -55,6 +55,16 @@ disable notifications:
 ./tgsend.sh sendq "your message in double quotes"
 ./tgsend.sh sendhtmlq "your message in double quotes"
 
+update existing message with message_id:
+
+./tgsend.sh update "your message in double quotes" message_id
+./tgsend.sh updatehtml "your message in double quotes" message_id
+
+update existing message with message_id & disable notifications:
+
+./tgsend.sh updateq "your message in double quotes" message_id
+./tgsend.sh updatehtmlq "your message in double quotes" message_id
+
 send file
 
 ./tgsend.sh sendf filename
@@ -93,6 +103,20 @@ send file
 ```
 
 ![Telegram Messages](/images/telegram-send-04.png)
+
+## Update an existing message with message_id
+
+```
+./tgsend.sh update "updated message" 38
+{
+  "from": "centmin",
+  "to": "George",
+  "date": "2021-07-08T00:39:04Z",
+  "message": "[msgid: 38] updated message"
+}
+```
+
+![Telegram Messages](/images/telegram-send-06.png)
 
 ## Send text file
 

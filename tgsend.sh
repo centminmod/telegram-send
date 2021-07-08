@@ -51,6 +51,8 @@ tg_send() {
   format=$1
   message="$2"
   silent="$3"
+  update="$4"
+  input_msgid="$5"
   tg_type='sendMessage'
 
   if [[ "$format" = 'md' ]]; then
@@ -72,9 +74,15 @@ tg_send() {
   fi
 
   if [[ "$tg_debug" = [yY] ]]; then
-    json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r)
+    if [[ "$update" = 'update' ]]; then
+      append_text="[msgid: $input_msgid] $message"
+      tg_type='editMessageText'
+      json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$input_msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
+    else
+      json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message" |  jq -r)
+    fi
     msgid=$(echo "$json_output" | jq -r '.result.message_id')
-    if [[ "$tg_addmsgid" = [yY] ]]; then
+    if [[ "$tg_addmsgid" = [yY] && "$update" != 'update' ]]; then
       append_text="[msgid: $msgid] $message"
       tg_type='editMessageText'
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
@@ -83,9 +91,15 @@ tg_send() {
     echo
     echo "message_id: $msgid"
   else
-    json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message")
+    if [[ "$update" = 'update' ]]; then
+      append_text="[msgid: $input_msgid] $message"
+      tg_type='editMessageText'
+      json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$input_msgid" -d chat_id="$tgchatid" -d text="$append_text")
+    else
+      json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d chat_id="$tgchatid" -d text="$message")
+    fi
     msgid=$(echo "$json_output" | jq -r '.result.message_id')
-    if [[ "$tg_addmsgid" = [yY] ]]; then
+    if [[ "$tg_addmsgid" = [yY] && "$update" != 'update' ]]; then
       append_text="[msgid: $msgid] $message"
       tg_type='editMessageText'
       json_output=$(curl -4s --connect-timeout $tg_timeout --max-time $tg_timeout -X POST "$tgapi/${tg_type}"${notify_opt}${webpreview_opt}${format_opt} -d message_id="$msgid" -d chat_id="$tgchatid" -d text="$append_text" |  jq -r)
@@ -133,6 +147,18 @@ help() {
   # echo "$0 sendmdq \"your message in double quotes\""
   echo "$0 sendhtmlq \"your message in double quotes\""
   echo
+  echo "update existing message with message_id:"
+  echo
+  echo "$0 update \"your message in double quotes\" message_id"
+  # echo "$0 updatemd \"your message in double quotes\" message_id"
+  echo "$0 updatehtml \"your message in double quotes\" message_id"
+  echo
+  echo "update existing message with message_id & disable notifications:"
+  echo
+  echo "$0 updateq \"your message in double quotes\" message_id"
+  # echo "$0 updatemdq \"your message in double quotes\" message_id"
+  echo "$0 updatehtmlq \"your message in double quotes\" message_id"
+  echo
   echo "send file"
   echo
   echo "$0 sendf filename"
@@ -143,13 +169,13 @@ case "$1" in
     tg_sendf file "$2"
     ;;
   send )
-    tg_send txt "$2"
+    tg_send txt "$2" verbose
     ;;
   sendmd )
-    tg_send md "$2"
+    tg_send md "$2" verbose
     ;;
   sendhtml )
-    tg_send html "$2"
+    tg_send html "$2" verbose
     ;;
   sendq )
     tg_send txt "$2" quiet
@@ -159,6 +185,24 @@ case "$1" in
     ;;
   sendhtmlq )
     tg_send html "$2" quiet
+    ;;
+  update )
+    tg_send txt "$2" verbose update "$3"
+    ;;
+  updatemd )
+    tg_send md "$2" verbose update "$3"
+    ;;
+  updatehtml )
+    tg_send html "$2" verbose update "$3"
+    ;;
+  updateq )
+    tg_send txt "$2" quiet update "$3"
+    ;;
+  updatemdq )
+    tg_send md "$2" quiet update "$3"
+    ;;
+  updatehtmlq )
+    tg_send html "$2" quiet update "$3"
     ;;
   * )
     help
